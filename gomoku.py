@@ -34,13 +34,18 @@ class Gomoku:
         new_board[action] = self.turn
         self.board_history.append(new_board)
 
-        reward = self.reward(action)
+        reward = self.judge(action)*self.turn
 
         self.turn *= -1
         self.board = new_board
         return self.board, reward
 
-    def reward(self):
+    def judge(self):
+        
+        #5개 연속으로 놓여있는지 확인
+        #가로
+        for i in range(STONE_NUM):
+
         #3개 연속으로 놓여있는지 확인
         #가로
         for i in range(STONE_NUM):
@@ -50,7 +55,7 @@ class Gomoku:
         #세로
         for i in range(STONE_NUM-4):
             for j in range(STONE_NUM):
-                if self.board[i][j] == self.board[i+1][j] == self.board[i+2][j] == self.board[i+3][j] == self.board[i+4][j] == self.turn:
+                if np.all(self.board[i][j:j+4]) == self.turn:
                     return self.turn
         #대각선
         for i in range(STONE_NUM-4):
