@@ -24,13 +24,21 @@ class Gomoku:
         self.pygame_init()
         self.turn = 1  # 1: black, -1: white
 
-    def step(self, action):
+        self.board_history = []
+
+    def step(self, action):  # action: (x, y)
         if self.board[action] != 0:
             raise ValueError('Invalid action')
+        
+        new_board = self.board.copy()
+        new_board[action] = self.turn
+        self.board_history.append(new_board)
 
-        self.board[action] = self.turn
+        done = self.done(action)
+        reward = self.reward(action)
+
         self.turn *= -1
-        return self.board, self.reward(), self.done()
+        return self.board, reward, done
 
     def reward(self):
         pass
