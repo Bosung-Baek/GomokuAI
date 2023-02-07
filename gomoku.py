@@ -12,10 +12,10 @@ WINDOW_Y = 800
 BOARD_SIZE = 600
 BOARD_MARGIN = np.array([100, 100])
 
-BOARD_NUM = 15
-BOARD_SHAPE = (BOARD_NUM, BOARD_NUM)
+STONE_NUM = 15
+BOARD_SHAPE = (STONE_NUM, STONE_NUM)
 
-LINE_GAP = int(BOARD_SIZE / BOARD_NUM)  # pygame 그릴 때, 격자 간격 (pixel)
+LINE_GAP = int(BOARD_SIZE / STONE_NUM)  # pygame 그릴 때, 격자 간격 (pixel)
 DOT_SIZE = 4
 
 class Gomoku:
