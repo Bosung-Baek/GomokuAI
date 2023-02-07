@@ -23,6 +23,7 @@ class Gomoku:
         self.board = np.zeros(BOARD_SHAPE)
         self.pygame_init()
         self.turn = 1  # 1: black, -1: white
+        self.done = False
 
         self.board_history = []
 
@@ -34,17 +35,13 @@ class Gomoku:
         new_board[action] = self.turn
         self.board_history.append(new_board)
 
-        done = self.done(action)
-        reward = self.reward(action)
+        reward = self.reward(action)  # done: 0: continue, 1: black win, -1: white win, 2: draw
 
         self.turn *= -1
         self.board = new_board
-        return self.board, reward, done
+        return self.board, reward
 
     def reward(self):
-        pass
-
-    def done(self):
         pass
     
     def pygame_init(self):
