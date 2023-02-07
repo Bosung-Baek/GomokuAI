@@ -34,7 +34,7 @@ class Gomoku:
         new_board[action] = self.turn
         self.board_history.append(new_board)
 
-        reward = self.judge(action)*self.turn
+        reward = self.judge()*self.turn
 
         self.turn *= -1
         self.board = new_board
