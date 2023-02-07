@@ -6,11 +6,10 @@ import numpy as np
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-WINDOW_X = 1200
-WINDOW_Y = 800
+WINDOW_SIZE = (1200, 800)  # pygame 창 크기 (pixel)
 
-BOARD_SIZE = 600
-BOARD_MARGIN = np.array([100, 100])
+BOARD_SIZE = 600  # pygame 보드 크기 (pixel)
+BOARD_MARGIN = np.array([100, 100])  # pygame 보드 위치 조정 (pixel)
 
 STONE_NUM = 15
 BOARD_SHAPE = (STONE_NUM, STONE_NUM)
@@ -46,7 +45,7 @@ class Gomoku:
     
     def pygame_init(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WINDOW_X, WINDOW_Y))
+        self.screen = pygame.display.set_mode(WINDOW_SIZE)
         self.screen.fill(WHITE)
         pygame.display.set_caption('Gomoku')
         pygame.display.flip()
