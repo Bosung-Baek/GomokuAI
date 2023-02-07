@@ -41,8 +41,27 @@ class Gomoku:
         return self.board, reward
 
     def reward(self):
-        pass
-    
+        #3개 연속으로 놓여있는지 확인
+        #가로
+        for i in range(BOARD_NUM):
+            for j in range(BOARD_NUM-4):
+                if self.board[i][j] == self.board[i][j+1] == self.board[i][j+2] == self.board[i][j+3] == self.board[i][j+4] == self.turn:
+                    return self.turn
+        #세로
+        for i in range(BOARD_NUM-4):
+            for j in range(BOARD_NUM):
+                if self.board[i][j] == self.board[i+1][j] == self.board[i+2][j] == self.board[i+3][j] == self.board[i+4][j] == self.turn:
+                    return self.turn
+        #대각선
+        for i in range(BOARD_NUM-4):
+            for j in range(BOARD_NUM-4):
+                if self.board[i][j] == self.board[i+1][j+1] == self.board[i+2][j+2] == self.board[i+3][j+3] == self.board[i+4][j+4] == self.turn:
+                    return self.turn
+        for i in range(BOARD_NUM-4):
+            for j in range(4, BOARD_NUM):
+                if self.board[i][j] == self.board[i+1][j-1] == self.board[i+2][j-2] == self.board[i+3][j-3] == self.board[i+4][j-4] == self.turn:
+                    return self.turn
+            
     def pygame_init(self):
         pygame.init()
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
