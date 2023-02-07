@@ -22,7 +22,7 @@ class Gomoku:
     def __init__(self):
         self.board = np.zeros(BOARD_SHAPE)
         self.pygame_init()
-        self.turn = 1
+        self.turn = 1  # 1: black, -1: white
 
     def step(self, action):
         if self.board[action] != 0:
@@ -49,8 +49,8 @@ class Gomoku:
     def render(self):
         # draw line
         for i in range(15):
-            pygame.draw.line(self.screen, BLACK, (0, i*LINE_GAP) + BOARD_MARGIN, (BOARD_SIZE, i*LINE_GAP) + BOARD_MARGIN)
-            pygame.draw.line(self.screen, BLACK, (i*LINE_GAP, 0) + BOARD_MARGIN, (i*LINE_GAP, BOARD_SIZE) + BOARD_MARGIN)
+            pygame.draw.line(self.screen, BLACK, (0, i*LINE_GAP) + BOARD_MARGIN, (BOARD_SIZE-LINE_GAP, i*LINE_GAP) + BOARD_MARGIN)
+            pygame.draw.line(self.screen, BLACK, (i*LINE_GAP, 0) + BOARD_MARGIN, (i*LINE_GAP, BOARD_SIZE-LINE_GAP) + BOARD_MARGIN)
         
         # draw dot
         for i in range(3):
@@ -61,13 +61,13 @@ class Gomoku:
         for i in range(15):
             for j in range(15):
                 if self.board[i][j] == 1:
-                    pygame.draw.circle(self.screen, BLACK, (i*40, j*40), 15)
+                    pygame.draw.circle(self.screen, BLACK, (i*LINE_GAP, j*LINE_GAP) + BOARD_MARGIN, int(LINE_GAP/2))
+
                 elif self.board[i][j] == -1:
-                    pygame.draw.circle(self.screen, WHITE, (i*40, j*40), 15)
-                    pygame.draw.circle(self.screen, BLACK, (i*40, j*40), 15, 3)
+                    pygame.draw.circle(self.screen, WHITE, (i*LINE_GAP, j*LINE_GAP) + BOARD_MARGIN, int(LINE_GAP/2))
+                    pygame.draw.circle(self.screen, BLACK, (i*LINE_GAP, j*LINE_GAP) + BOARD_MARGIN, int(LINE_GAP/2), 1)
 
         pygame.display.flip()
-        
         
 
 if __name__ == '__main__':
