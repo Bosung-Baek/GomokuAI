@@ -34,7 +34,7 @@ class Gomoku:
         new_board[action] = self.turn
         self.board_history.append(new_board)
 
-        reward = self.reward(action)  # done: 0: continue, 1: black win, -1: white win, 2: draw
+        reward = self.reward(action)
 
         self.turn *= -1
         self.board = new_board
@@ -45,7 +45,7 @@ class Gomoku:
         #가로
         for i in range(STONE_NUM):
             for j in range(STONE_NUM-4):
-                if self.board[i][j] == self.board[i][j+1] == self.board[i][j+2] == self.board[i][j+3] == self.board[i][j+4] == self.turn:
+                if np.all(self.board[i:i+4][j]) == self.turn:
                     return self.turn
         #세로
         for i in range(STONE_NUM-4):
