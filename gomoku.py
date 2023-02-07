@@ -38,6 +38,7 @@ class Gomoku:
         reward = self.reward(action)
 
         self.turn *= -1
+        self.board = new_board
         return self.board, reward, done
 
     def reward(self):
