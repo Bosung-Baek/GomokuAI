@@ -18,7 +18,7 @@ class GomokuHumanVsHuman(Gomoku):
         if 0 <= x < STONE_NUM and 0 <= y < STONE_NUM:
             if self.board[x, y] == 0:
                 pygame.draw.circle(self.screen, (0, 0, 0), (x * LINE_GAP +
-                                   BOARD_MARGIN[0], y * LINE_GAP + BOARD_MARGIN[1]), int(LINE_GAP/2.5), 1)
+                                   BOARD_MARGIN[0], y * LINE_GAP + BOARD_MARGIN[1]), CIRCLE_RADIUS, 1)
 
         # 게임 종료 시 결과 표시
         if self.done * self.turn == -1:

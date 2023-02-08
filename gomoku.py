@@ -17,6 +17,8 @@ BOARD_SHAPE = (STONE_NUM, STONE_NUM)
 LINE_GAP = int(BOARD_SIZE / STONE_NUM)  # pygame 그릴 때, 격자 간격 (pixel)
 DOT_SIZE = 4
 
+CIRCLE_RADIUS = int(LINE_GAP / 2.5)  # pygame 돌 그릴 때, 반지름 (pixel)
+
 
 class Gomoku:
     def __init__(self):
@@ -73,21 +75,25 @@ class Gomoku:
     def check_five_in_a_row(self, stone, direction, count):
         if count == 5:
             return True
-        
-        next_stone = (stone[0]+direction[0], stone[1]+direction[1])
 
-        if next_stone[0] < 0 or next_stone[0] >= STONE_NUM or next_stone[1] < 0 or next_stone[1] >= STONE_NUM:
+        next_stone = stone + direction
+
+        # 보드 범위 밖의 좌표는 무시하기
+        if not(0 <= next_stone[0] < STONE_NUM and 0 <= next_stone[1] < STONE_NUM):
             return False
 
-        if self.board[next_stone] == self.turn:
+        if self.board[tuple(next_stone)] == self.turn:  # 같은 색의 돌이면
             return self.check_five_in_a_row(next_stone, direction, count+1)
         else:
             return False
 
     def is_finish(self, last_stone):
+        last_stone = np.array(last_stone)
         directions = [(1, 0), (-1, 0), (0, 1), (0, -1),
                       (1, 1), (-1, -1), (1, -1), (-1, 1)]
+        # 8방향으로 5개 연속으로 놓여있는지 확인
         for direction in directions:
+            # 5개 연속으로 놓여있는지 확인
             if self.check_five_in_a_row(last_stone, direction, 1):
                 return True
         else:
@@ -122,13 +128,13 @@ class Gomoku:
             for j in range(15):
                 if self.board[i][j] == 1:
                     pygame.draw.circle(
-                        self.screen, BLACK, (i*LINE_GAP, j*LINE_GAP) + BOARD_MARGIN, int(LINE_GAP/2.5))
+                        self.screen, BLACK, (i*LINE_GAP, j*LINE_GAP) + BOARD_MARGIN, CIRCLE_RADIUS)
 
                 elif self.board[i][j] == -1:
                     pygame.draw.circle(
-                        self.screen, WHITE, (i*LINE_GAP, j*LINE_GAP) + BOARD_MARGIN, int(LINE_GAP/2.5))
+                        self.screen, WHITE, (i*LINE_GAP, j*LINE_GAP) + BOARD_MARGIN, CIRCLE_RADIUS)
                     pygame.draw.circle(
-                        self.screen, BLACK, (i*LINE_GAP, j*LINE_GAP) + BOARD_MARGIN, int(LINE_GAP/2.5), 1)
+                        self.screen, BLACK, (i*LINE_GAP, j*LINE_GAP) + BOARD_MARGIN, CIRCLE_RADIUS, 1)
 
         # turn 표시
         if self.turn == 1:
@@ -140,7 +146,7 @@ class Gomoku:
         text = font.render(text, True, BLACK)
         self.screen.blit(
             text, (BOARD_SIZE + BOARD_MARGIN[0] + 50, BOARD_MARGIN[1]))
-        
+
         # 다른 클래스 상속받아서 사용할 때는 pygame.display.flip()을 호출하지 않음
         if type(self) == Gomoku:
             pygame.display.flip()
