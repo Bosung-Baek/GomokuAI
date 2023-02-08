@@ -137,7 +137,11 @@ class Gomoku:
                         self.screen, BLACK, (i*LINE_GAP, j*LINE_GAP) + BOARD_MARGIN, CIRCLE_RADIUS, 1)
 
         # turn 표시
-        if self.turn == 1:
+        if self.done * self.turn == -1:
+            text = 'Black win'
+        elif self.done * self.turn == 1:
+            text = 'White win'
+        elif self.turn == 1:
             text = 'Black turn'
         else:
             text = 'White turn'
