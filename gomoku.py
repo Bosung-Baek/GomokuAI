@@ -155,6 +155,19 @@ class Gomoku:
         if type(self) == Gomoku:
             pygame.display.flip()
 
+    def reset(self):
+        self.board = np.zeros(BOARD_SHAPE)
+        self.turn = 1
+        self.done = False
+        self.board_history = []
+
+    def undo(self):
+        if len(self.board_history) > 0:
+            self.board_history.pop()
+            self.board = self.board_history[-1]
+            self.turn *= -1
+            self.done = False
+
 
 # 자동으로 돌을 두는 예제 실행
 if __name__ == '__main__':

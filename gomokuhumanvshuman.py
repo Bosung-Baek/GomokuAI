@@ -43,6 +43,13 @@ while True:
                 if gomoku.board[x, y] == 0:
                     gomoku.step((x, y))
 
+        # 스페이스바 누르면 게임 리셋, 왼쪽 화살표 누르면 한 수 뒤로
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                gomoku.reset()
+            elif event.key == pygame.K_LEFT:
+                gomoku.undo()
+
     gomoku.render()
 
     # 프레임 속도 조절
