@@ -10,19 +10,22 @@ WINDOW_SIZE = (1200, 800)  # pygame 창 크기 (pixel)
 
 BOARD_SIZE = 600  # pygame 보드 크기 (pixel)
 BOARD_MARGIN = np.array([100, 100])  # pygame 보드 위치 조정 (pixel)
+TEXT_MARGIN = np.array([BOARD_SIZE + 50, 0]) + BOARD_MARGIN  # pygame 텍스트 위치 조정, 기준은 board (pixel)
 
 STONE_NUM = 15
 BOARD_SHAPE = (STONE_NUM, STONE_NUM)
 
 LINE_GAP = int(BOARD_SIZE / STONE_NUM)  # pygame 그릴 때, 격자 간격 (pixel)
 DOT_SIZE = 4
+FONT_SIZE = 30
 
 CIRCLE_RADIUS = int(LINE_GAP / 2.5)  # pygame 돌 그릴 때, 반지름 (pixel)
 
 
 class Gomoku:
     def __init__(self):
-        self.board = np.zeros(BOARD_SHAPE)
+        # 0: empty, 1: black, -1: white
+        self.board = np.zeros(BOARD_SHAPE, dtype=np.int8)
         self.pygame_init()
         self.turn = 1  # 1: black, -1: white
         self.done = False
@@ -79,7 +82,7 @@ class Gomoku:
         next_stone = stone + direction
 
         # 보드 범위 밖의 좌표는 무시하기
-        if not(0 <= next_stone[0] < STONE_NUM and 0 <= next_stone[1] < STONE_NUM):
+        if not np.all((0 <= next_stone) & (next_stone < STONE_NUM)):
             return False
 
         if self.board[tuple(next_stone)] == self.turn:  # 같은 색의 돌이면
@@ -146,10 +149,9 @@ class Gomoku:
         else:
             text = 'White turn'
 
-        font = pygame.font.SysFont('comicsansms', 30)
+        font = pygame.font.SysFont('comicsansms', FONT_SIZE)
         text = font.render(text, True, BLACK)
-        self.screen.blit(
-            text, (BOARD_SIZE + BOARD_MARGIN[0] + 50, BOARD_MARGIN[1]))
+        self.screen.blit(text, TEXT_MARGIN)
 
         # 다른 클래스 상속받아서 사용할 때는 pygame.display.flip()을 호출하지 않음
         if type(self) == Gomoku:
