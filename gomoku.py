@@ -10,7 +10,8 @@ WINDOW_SIZE = (1200, 800)  # pygame 창 크기 (pixel)
 
 BOARD_SIZE = 600  # pygame 보드 크기 (pixel)
 BOARD_MARGIN = np.array([100, 100])  # pygame 보드 위치 조정 (pixel)
-TEXT_MARGIN = np.array([BOARD_SIZE + 50, 0]) + BOARD_MARGIN  # pygame 텍스트 위치 조정, 기준은 board (pixel)
+# board를 기준으로 pygame 텍스트 위치 조정 (pixel)
+TEXT_MARGIN = BOARD_MARGIN + np.array([BOARD_SIZE + 50, 0])
 
 STONE_NUM = 15
 BOARD_SHAPE = (STONE_NUM, STONE_NUM)
@@ -32,18 +33,19 @@ class Gomoku:
 
         self.board_history = []
 
-    def step(self, action):  # action: (x, y)
-        if self.board[action] != 0:
+    def step(self, action):  # action: np.ndarray(x, y)
+        if self.board[tuple(action)] != 0:
             raise ValueError('Invalid action')
 
         next_board = self.board.copy()
-        next_board[action] = self.turn
-        self.board_history.append(next_board)
+        next_board[tuple(action)] = self.turn
 
         self.board = next_board
+        self.board_history.append(self.board)
+
         # reward = self.judge() * self.turn
         reward = 0
-        self.done = self.is_finish(action)
+        self.done = self.is_finished(action)
 
         self.turn *= -1
         return self.board, reward, self.done
@@ -90,7 +92,7 @@ class Gomoku:
         else:
             return False
 
-    def is_finish(self, last_stone):
+    def is_finished(self, last_stone):
         last_stone = np.array(last_stone)
         directions = [(1, 0), (-1, 0), (0, 1), (0, -1),
                       (1, 1), (-1, -1), (1, -1), (-1, 1)]
