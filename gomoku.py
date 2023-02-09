@@ -77,27 +77,29 @@ class Gomoku:
 
     def check_five_in_a_row(self, stone, direction, count):
         if count == 5:
-            return True
+            return count
 
         next_stone = stone + direction
 
         # 보드 범위 밖의 좌표는 무시하기
         if not np.all((0 <= next_stone) & (next_stone < BOARD_SHAPE[0])):
-            return False
+            return count
 
         if self.board[tuple(next_stone)] == self.turn:  # 같은 색의 돌이면
             return self.check_five_in_a_row(next_stone, direction, count+1)
         else:
-            return False
+            return count
 
     def is_finished(self, last_stone):
         last_stone = np.array(last_stone)
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1),
-                      (1, 1), (-1, -1), (1, -1), (-1, 1)]
+        directions = np.array([[1, 0], [0, 1], [1, 1], [1, -1]])
+
         # 8방향으로 5개 연속으로 놓여있는지 확인
         for direction in directions:
             # 5개 연속으로 놓여있는지 확인
-            if self.check_five_in_a_row(last_stone, direction, 1):
+            way1 = self.check_five_in_a_row(last_stone, direction, 1)
+            way2 = self.check_five_in_a_row(last_stone, -direction, 1)
+            if way1 + way2 - 1 >= 5:
                 return True
         else:
             return False
