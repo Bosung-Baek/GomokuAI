@@ -16,7 +16,7 @@ class GomokuHumanVsHuman(Gomoku):
         stone_pos = np.array(stone_pos, dtype=int)
 
         # 마우스 커서 위치가 보드 안에 있을 때만 힌트 표시
-        if np.all((stone_pos >= 0) & (stone_pos < BOARD_SHAPE[0])):
+        if np.all((stone_pos >= 0) & (stone_pos < BOARD_SHAPE[0])) and not self.done:
             if self.board[tuple(stone_pos)] == 0:
                 pygame.draw.circle(self.screen, (0, 0, 0),
                                    stone_pos * LINE_GAP + BOARD_MARGIN, CIRCLE_RADIUS, 1)
