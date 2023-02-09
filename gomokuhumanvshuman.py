@@ -16,7 +16,7 @@ class GomokuHumanVsHuman(Gomoku):
         stone_pos = np.array(stone_pos, dtype=int)
 
         # 마우스 커서 위치가 보드 안에 있을 때만 힌트 표시
-        if np.all((stone_pos >= 0) & (stone_pos < STONE_NUM)):
+        if np.all((stone_pos >= 0) & (stone_pos < BOARD_SHAPE[0])):
             if self.board[tuple(stone_pos)] == 0:
                 pygame.draw.circle(self.screen, (0, 0, 0),
                                    stone_pos * LINE_GAP + BOARD_MARGIN, CIRCLE_RADIUS, 1)
@@ -38,7 +38,7 @@ while True:
             mouse_pos = np.array(pygame.mouse.get_pos())
             stone_pos = (mouse_pos+LINE_GAP/2 - BOARD_MARGIN) / LINE_GAP
             stone_pos = np.array(stone_pos, dtype=int)
-            if np.all((stone_pos >= 0) & (stone_pos < STONE_NUM)):
+            if np.all((stone_pos >= 0) & (stone_pos < BOARD_SHAPE[0])):
                 if gomoku.board[tuple(stone_pos)] == 0:
                     gomoku.step(stone_pos)
 

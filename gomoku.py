@@ -13,15 +13,13 @@ BOARD_MARGIN = np.array([100, 100])  # pygame 보드 위치 조정 (pixel)
 # board를 기준으로 pygame 텍스트 위치 조정 (pixel)
 TEXT_MARGIN = BOARD_MARGIN + np.array([BOARD_SIZE + 50, 0])
 
-STONE_NUM = 15
-BOARD_SHAPE = (STONE_NUM, STONE_NUM)
+BOARD_SHAPE = (15, 15)
+LINE_GAP = int(BOARD_SIZE / BOARD_SHAPE[0])  # pygame 그릴 때, 격자 간격 (pixel)
 
-LINE_GAP = int(BOARD_SIZE / STONE_NUM)  # pygame 그릴 때, 격자 간격 (pixel)
 DOT_SIZE = 4
 FONT_SIZE = 30
 
 CIRCLE_RADIUS = int(LINE_GAP / 2.5)  # pygame 돌 그릴 때, 반지름 (pixel)
-
 
 class Gomoku:
     def __init__(self):
@@ -54,26 +52,26 @@ class Gomoku:
 
         #5개 연속으로 놓여있는지 확인
         #가로
-        for i in range(STONE_NUM):
+        for i in range(BOARD_SHAPE[0]):
             pass
             #3개 연속으로 놓여있는지 확인
             #가로
-        for i in range(STONE_NUM):
-            for j in range(STONE_NUM-4):
+        for i in range(BOARD_SHAPE[0]):
+            for j in range(BOARD_SHAPE[0]-4):
                 if np.all(self.board[i:i+4][j]) == self.turn:
                     return self.turn
         #세로
-        for i in range(STONE_NUM-4):
-            for j in range(STONE_NUM):
+        for i in range(BOARD_SHAPE[0]-4):
+            for j in range(BOARD_SHAPE[0]):
                 if np.all(self.board[i][j:j+4]) == self.turn:
                     return self.turn
         #대각선
-        for i in range(STONE_NUM-4):
-            for j in range(STONE_NUM-4):
+        for i in range(BOARD_SHAPE[0]-4):
+            for j in range(BOARD_SHAPE[0]-4):
                 if self.board[i][j] == self.board[i+1][j+1] == self.board[i+2][j+2] == self.board[i+3][j+3] == self.board[i+4][j+4] == self.turn:
                     return self.turn
-        for i in range(STONE_NUM-4):
-            for j in range(4, STONE_NUM):
+        for i in range(BOARD_SHAPE[0]-4):
+            for j in range(4, BOARD_SHAPE[0]):
                 if self.board[i][j] == self.board[i+1][j-1] == self.board[i+2][j-2] == self.board[i+3][j-3] == self.board[i+4][j-4] == self.turn:
                     return self.turn
 
@@ -84,7 +82,7 @@ class Gomoku:
         next_stone = stone + direction
 
         # 보드 범위 밖의 좌표는 무시하기
-        if not np.all((0 <= next_stone) & (next_stone < STONE_NUM)):
+        if not np.all((0 <= next_stone) & (next_stone < BOARD_SHAPE[0])):
             return False
 
         if self.board[tuple(next_stone)] == self.turn:  # 같은 색의 돌이면
