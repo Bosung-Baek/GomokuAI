@@ -48,36 +48,40 @@ class Gomoku:
         self.turn *= -1
         return self.board, reward, self.done
 
-    def judge(self):
 
-        #5개 연속으로 놓여있는지 확인
-        #가로
-        for i in range(BOARD_SHAPE[0]):
-            pass
-            #3개 연속으로 놓여있는지 확인
-            #가로
-        for i in range(BOARD_SHAPE[0]):
-            for j in range(BOARD_SHAPE[0]-4):
-                if np.all(self.board[i:i+4][j]) == self.turn:
-                    return self.turn
-        #세로
-        for i in range(BOARD_SHAPE[0]-4):
-            for j in range(BOARD_SHAPE[0]):
-                if np.all(self.board[i][j:j+4]) == self.turn:
-                    return self.turn
-        #대각선
-        for i in range(BOARD_SHAPE[0]-4):
-            for j in range(BOARD_SHAPE[0]-4):
-                if self.board[i][j] == self.board[i+1][j+1] == self.board[i+2][j+2] == self.board[i+3][j+3] == self.board[i+4][j+4] == self.turn:
-                    return self.turn
-        for i in range(BOARD_SHAPE[0]-4):
-            for j in range(4, BOARD_SHAPE[0]):
-                if self.board[i][j] == self.board[i+1][j-1] == self.board[i+2][j-2] == self.board[i+3][j-3] == self.board[i+4][j-4] == self.turn:
-                    return self.turn
+    def judge(self):
+        directions = np.array([[1, 0], [0, 1], [1, 1], [1, -1]])
+        black = set()
+        white = set()
+        for row in BOARD_SHAPE[0]:
+            for col in BOARD_SHAPE[1]:
+                if self.board[row][col] == 0:
+                    continue
+
+                for direction in directions:
+                    check = set()
+                    check.append((row, col))
+
+                    dir1, is_closed1 = self.check_five_in_a_row(np.array([row, col]), direction, 1)
+                    dir2, is_closed2 = self.check_five_in_a_row(np.array([row, col]), -direction, 1)
+                    
+                    for i in range(dir1):
+                        check.add((row + direction[0] * i, col + direction[1] * i))
+                    for i in range(dir2):
+                        check.add((row - direction[0] * i, col - direction[1] * i))
+                
+                if self.board[row][col] == 1:
+                    black.add((check, is_closed1+is_closed2, ))
+                else:
+                    white.add((check, is_closed1+is_closed2))
+        
+
+        # return black_score - white_score
+
 
     def check_five_in_a_row(self, stone, direction, count):
         if count == 5:
-            return count
+            return count, False
 
         next_stone = stone + direction
 
@@ -87,8 +91,10 @@ class Gomoku:
 
         if self.board[tuple(next_stone)] == self.turn:  # 같은 색의 돌이면
             return self.check_five_in_a_row(next_stone, direction, count+1)
+        elif self.board[tuple(next_stone)] == -self.turn: # 다른 색의 돌이면
+            return count, True
         else:
-            return count
+            return count, False
 
     def is_finished(self, last_stone):
         last_stone = np.array(last_stone)
@@ -97,8 +103,8 @@ class Gomoku:
         # 8방향으로 5개 연속으로 놓여있는지 확인
         for direction in directions:
             # 5개 연속으로 놓여있는지 확인
-            way1 = self.check_five_in_a_row(last_stone, direction, 1)
-            way2 = self.check_five_in_a_row(last_stone, -direction, 1)
+            way1, _ = self.check_five_in_a_row(last_stone, direction, 1)
+            way2, _ = self.check_five_in_a_row(last_stone, -direction, 1)
             if way1 + way2 - 1 >= 5:
                 return True
         else:
