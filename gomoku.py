@@ -51,8 +51,7 @@ class Gomoku:
 
     def judge(self):
         directions = np.array([[1, 0], [0, 1], [1, 1], [1, -1]])
-        black = set()
-        white = set()
+        check_straight = set()
         for row in BOARD_SHAPE[0]:
             for col in BOARD_SHAPE[1]:
                 if self.board[row][col] == 0:
@@ -69,14 +68,27 @@ class Gomoku:
                         check.add((row + direction[0] * i, col + direction[1] * i))
                     for i in range(dir2):
                         check.add((row - direction[0] * i, col - direction[1] * i))
-                
-                if self.board[row][col] == 1:
-                    black.add((check, is_closed1+is_closed2, ))
-                else:
-                    white.add((check, is_closed1+is_closed2))
-        
 
-        # return black_score - white_score
+                    if self.board[row][col] == 1:
+                        check_straight.add((1, check, is_closed1+is_closed2))
+                    else:
+                        check_straight.add((-1, check, is_closed1+is_closed2))
+        
+        score = 0
+
+        for stone, check, is_closed in check_straight:
+            if len(check) == 4 and stone == self.turn and not is_closed == 2:
+                return 200
+            elif len(check) == 4 and stone == -self.turn and is_closed == 0:
+                return -200
+            elif len(check) == 4 and stone == -self.turn and is_closed == 1:
+                score -= 30
+            elif len(check) == 3 and stone == self.turn and is_closed == 0:
+                score += 15
+            elif len(check) == 3 and stone == -self.turn and is_closed == 0:
+                score -= 10
+
+        return score
 
 
     def check_five_in_a_row(self, stone, direction, count):
