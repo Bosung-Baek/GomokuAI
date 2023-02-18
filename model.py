@@ -1,15 +1,22 @@
 #dqn model train method
-import numpy as np
 from gomoku import *
-import tensorflow as tf
+
+import numpy as np
 import random
 
-class DQN(tf.model):
+import tensorflow as tf
+
+from keras.layers import Dense
+from keras.optimizers import Adam
+from keras import Model
+
+
+class DQN(Model):
     def __init__(self, num_observations, num_action):
         super(DQN, self).__init__()
-        self.fc1 = tf.keras.layers.Dense(128, input_shape=(num_observations,), activation='relu')
-        self.fc2 = tf.keras.layers.Dense(128, activation='relu')
-        self.fc3 = tf.keras.layers.Dense(num_action, activation='linear')
+        self.fc1 = Dense(128, input_shape=(num_observations,), activation='relu')
+        self.fc2 = Dense(128, activation='relu')
+        self.fc3 = Dense(num_action, activation='linear')
     
     def forward(self, x):
         x = self.fc1(x)
@@ -25,7 +32,7 @@ class train():
         
         self.num_action = num_action
         self.gamma = gamma
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate)
+        self.optimizer = Adam(learning_rate)
         self.epsilon_start = 1.0
         self.epsilon_end = 0.01
         self.epsilon_decay = 0.0001
