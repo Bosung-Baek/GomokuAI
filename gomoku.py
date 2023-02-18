@@ -28,6 +28,7 @@ class Gomoku:
         self.pygame_init()
         self.turn = 1  # 1: black, -1: white
         self.done = False
+        self.reward = 0
 
         self.board_history = []
 
@@ -41,25 +42,25 @@ class Gomoku:
         self.board = next_board
         self.board_history.append(self.board)
 
-        # reward = self.judge() * self.turn
-        reward = 0
-        self.done = self.is_finished(action)
+        self.reward = self.judge() * self.turn
+        # reward = 0
+        self.done = self.is_finished(action)  # True or False - (-self.turn)
 
         self.turn *= -1
-        return self.board, reward, self.done
+        return self.board, self.reward, self.done
 
 
     def judge(self):
         directions = np.array([[1, 0], [0, 1], [1, 1], [1, -1]])
         check_straight = set()
-        for row in BOARD_SHAPE[0]:
-            for col in BOARD_SHAPE[1]:
+        for row in range(BOARD_SHAPE[0]):
+            for col in range(BOARD_SHAPE[1]):
                 if self.board[row][col] == 0:
                     continue
 
                 for direction in directions:
                     check = set()
-                    check.append((row, col))
+                    check.add((row, col))
 
                     dir1, is_closed1 = self.check_five_in_a_row(np.array([row, col]), direction, 1)
                     dir2, is_closed2 = self.check_five_in_a_row(np.array([row, col]), -direction, 1)
@@ -69,11 +70,16 @@ class Gomoku:
                     for i in range(dir2):
                         check.add((row - direction[0] * i, col - direction[1] * i))
 
+                    if len(check) < 2 or is_closed1+is_closed2 == 2:
+                        continue
+
                     if self.board[row][col] == 1:
-                        check_straight.add((1, check, is_closed1+is_closed2))
+                        check_straight.add((1, tuple(check), is_closed1+is_closed2))
                     else:
-                        check_straight.add((-1, check, is_closed1+is_closed2))
+                        check_straight.add((-1, tuple(check), is_closed1+is_closed2))
         
+        print(check_straight)
+
         score = 0
 
         for stone, check, is_closed in check_straight:
@@ -172,6 +178,14 @@ class Gomoku:
         font = pygame.font.SysFont('comicsansms', FONT_SIZE)
         text = font.render(text, True, BLACK)
         self.screen.blit(text, TEXT_MARGIN)
+
+        # 점수 표시
+        text = str(self.reward)
+        # font = pygame.font.SysFont('comicsansms', FONT_SIZE)
+        text = font.render(text, True, BLACK)
+        self.screen.blit(text, TEXT_MARGIN + (0, 40))
+
+
 
         # 다른 클래스 상속받아서 사용할 때는 pygame.display.flip()을 호출하지 않음
         if type(self) == Gomoku:
