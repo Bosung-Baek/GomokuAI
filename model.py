@@ -4,11 +4,15 @@ from gomoku import *
 import numpy as np
 import random
 
-import tensorflow as tf
 
-from keras.layers import Dense
-from keras.optimizers import Adam
 from keras import Model
+from keras import Sequential
+from keras.layers import Dense
+from keras.layers import Flatten
+from keras.optimizers import Adam
+
+from tensorflow import GradientTape
+from keras.losses import mean_squared_error
 
 
 class DQN(Model):
@@ -24,52 +28,78 @@ class DQN(Model):
         x = self.fc3(x)
         return x
     
-class train():
-    def __init__(self, num_observations, num_action, learning_rate, gamma):
-        self.model = DQN(num_observations, num_action)
-        self.target_model = DQN(num_observations, num_action)
+class DQNAgent():
+    def __init__(self):
+        
+        self.model = Sequential([
+            Flatten(input_shape=BOARD_SHAPE),
+            Dense(128, activation='relu'),
+            Dense(128, activation='relu'),
+            Dense(128, activation='relu'),
+            Dense(225, activation='softmax')
+        ])
+        # 입력 (-1, 15, 15, 1)
+        # 출력 (-1, 225)
+
+        self.target_model = Sequential([
+            Flatten(input_shape=BOARD_SHAPE),
+            Dense(128, activation='relu'),
+            Dense(128, activation='relu'),
+            Dense(128, activation='relu'),
+            Dense(225, activation='softmax')
+        ])
+        # 입력 (-1, 15, 15, 1)
+        # 출력 (-1, 225)
+
         self.target_model.set_weights(self.model.get_weights())
         
-        self.num_action = num_action
-        self.gamma = gamma
-        self.optimizer = Adam(learning_rate)
+        self.num_action = BOARD_SHAPE[0]
+        self.gamma = 0.99
+        self.optimizer = Adam(lr=0.001)
         self.epsilon_start = 1.0
         self.epsilon_end = 0.01
         self.epsilon_decay = 0.0001
+        self.train_start = 1000
+        self.step = 1
 
         self.batch_size = 128
         self.memory = []
-        self.lr = learning_rate
+        self.lr = 0.001
 
 
     def select_action(self, state):
         self.epsilon = self.epsilon_end + (self.epsilon_start - self.epsilon_end) * np.exp(-1. * self.step / self.epsilon_decay)
         self.step += 1
         if np.random.rand() < self.epsilon:
-            return np.random.randint(self.num_action)
+            # return np.random.randint(self.num_action), np.random.randint(self.num_action)
+            return np.random.randint(0, self.num_action, size=2)
         else:
-            return np.argmax(self.model.forward(state))
-        
+            answer = self.model.predict(state.reshape(-1, 15, 15, 1))
+            return np.array([np.argmax(answer) // 15, np.argmax(answer) % 15])
+
+    def append_sample(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
+
     def optimize_model(self):
         if(len(self.memory) < self.batch_size):
             return
         
-        batch = random.sample(self.memory, self.batch_size)
+        mini_batch = random.sample(self.memory, self.batch_size)
 
-        state_batch = np.array([x[0] for x in batch])
-        action_batch = np.array([x[1] for x in batch])
-        reward_batch = np.array([x[2] for x in batch])
-        next_state_batch = np.array([x[3] for x in batch])
-        done_batch = np.array([x[4] for x in batch])
+        states = np.array([x[0] for x in mini_batch])
+        actions = np.array([x[1] for x in mini_batch])
+        rewards = np.array([x[2] for x in mini_batch])
+        next_states = np.array([x[3] for x in mini_batch])
+        dones = np.array([x[4] for x in mini_batch])
 
-        state_action_values = self.model.forward(state_batch).numpy()
+        state_action_values = self.model.predict(states.reshape(-1, 15, 15, 1)).numpy()
 
-        next_state_values = self.target_model.forward(next_state_batch).numpy()
+        next_state_values = self.target_model.predict(next_states.reshape(-1, 15, 15, 1)).numpy()
 
-        state_action_values[range(self.batch_size), action_batch] = reward_batch + self.gamma * np.max(next_state_values, axis=1) * (1 - done_batch)
+        state_action_values[range(self.batch_size), actions] = rewards + self.gamma * np.max(next_state_values, axis=1) * (1 - dones)
 
-        with tf.GradientTape() as tape:
-            loss = tf.keras.losses.mean_squared_error(state_action_values, self.model.forward(state_batch))
+        with GradientTape() as tape:
+            loss = mean_squared_error(state_action_values, self.model.forward(states))
 
         gradients = tape.gradient(loss, self.model.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
@@ -103,17 +133,63 @@ class train():
 
 if __name__ == '__main__':
     env = Gomoku()
-    num_observations = env.observation_space.shape[0]
-    num_action = env.action_space.n
-    learning_rate = 0.001
-    gamma = 0.99
-    num_episode = 10000
-
-    agent = train(num_observations, num_action, learning_rate, gamma)
-    agent.train(env, num_episode)
-
+    # state_size = BOARD_SHAPE
+    # action_size = len(env.board[env.board==0])  # TODO: 반복문 안에 집어넣기
     
+    render = False
 
+    agent_black = DQNAgent()
+    agent_white = DQNAgent()
 
-        
-        
+    score_avg_black = 0
+    score_avg_white = 0
+
+    num_episode = 100
+    for episode in range(num_episode):
+        done = False
+
+        score_black = 0
+        score_white = 0
+
+        next_reward = 0
+
+        state = env.reset()  # 15x15 넘파이 어레이
+
+        while not done:
+            if render:
+                env.render()
+            
+            action_black = agent_black.select_action(state)
+            # action_black의 자료형 - 0~14 사이의 정수 2개
+
+            reward = next_reward
+            next_state, next_reward, done = env.step(action_black)  # TODO: Judge 함수만 제대로 고치면 됨
+
+            score_black += reward
+
+            agent_black.append_sample(state, action_black, reward, next_state, done)
+            if len(agent_black.memory) >= agent_black.train_start:
+                agent_black.optimize_model()
+
+            state = next_state
+
+            action_white = agent_white.select_action(state)
+            reward = next_reward
+            next_state, next_reward, done = env.step(action_white)
+
+            score_white += reward
+
+            agent_white.append_sample(state, action_white, reward, next_state, done)
+            if len(agent_white.memory) >= agent_white.train_start:
+                agent_white.optimize_model()
+            
+            state = next_state
+
+            if done:
+                agent_black.update_target_model()
+                agent_white.update_target_model()
+
+                if episode % 10 == 0:
+                    agent_black.model.save_weights('model_black.h5')
+                    agent_white.model.save_weights('model_white.h5')
+

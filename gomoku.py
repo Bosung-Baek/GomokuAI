@@ -197,6 +197,8 @@ class Gomoku:
         self.done = False
         self.board_history = []
 
+        return self.board
+
     def undo(self):
         if len(self.board_history) > 0:
             self.board_history.pop()
