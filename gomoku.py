@@ -78,7 +78,7 @@ class Gomoku:
                     else:
                         check_straight.add((-1, tuple(check), is_closed1+is_closed2))
         
-        print(check_straight)
+        # print(check_straight)
 
         score = 0
 
@@ -105,7 +105,7 @@ class Gomoku:
 
         # 보드 범위 밖의 좌표는 무시하기
         if not np.all((0 <= next_stone) & (next_stone < BOARD_SHAPE[0])):
-            return count
+            return count, True
 
         if self.board[tuple(next_stone)] == self.turn:  # 같은 색의 돌이면
             return self.check_five_in_a_row(next_stone, direction, count+1)
@@ -190,6 +190,10 @@ class Gomoku:
         # 다른 클래스 상속받아서 사용할 때는 pygame.display.flip()을 호출하지 않음
         if type(self) == Gomoku:
             pygame.display.flip()
+
+        # FPS
+        clock = pygame.time.Clock()
+        clock.tick(20)
 
     def reset(self):
         self.board = np.zeros(BOARD_SHAPE)

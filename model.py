@@ -72,10 +72,19 @@ class DQNAgent():
         self.step += 1
         if np.random.rand() < self.epsilon:
             # return np.random.randint(self.num_action), np.random.randint(self.num_action)
-            return np.random.randint(0, self.num_action, size=2)
+            action_pos = np.random.randint(0, self.num_action, size=2)
+            while env.board[action_pos[0], action_pos[1]] != 0:
+                action_pos = np.random.randint(0, self.num_action, size=2)
+            return action_pos
+        
         else:
-            answer = self.model.predict(state.reshape(-1, 15, 15, 1))
-            return np.array([np.argmax(answer) // 15, np.argmax(answer) % 15])
+            action = self.model.predict(state.reshape(-1, 15, 15, 1), verbose=0)
+            action_pos = np.array([np.argmax(action) // 15, np.argmax(action) % 15])
+
+            while env.board[action_pos[0], action_pos[1]] != 0:
+                action[0, np.argmax(action)] = -999
+                action_pos = np.array([np.argmax(action) // 15, np.argmax(action) % 15])
+            return action_pos
 
     def append_sample(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
@@ -92,9 +101,9 @@ class DQNAgent():
         next_states = np.array([x[3] for x in mini_batch])
         dones = np.array([x[4] for x in mini_batch])
 
-        state_action_values = self.model.predict(states.reshape(-1, 15, 15, 1)).numpy()
+        state_action_values = self.model.predict(states.reshape(-1, 15, 15, 1), verbose=0).numpy()
 
-        next_state_values = self.target_model.predict(next_states.reshape(-1, 15, 15, 1)).numpy()
+        next_state_values = self.target_model.predict(next_states.reshape(-1, 15, 15, 1), verbose=0).numpy()
 
         state_action_values[range(self.batch_size), actions] = rewards + self.gamma * np.max(next_state_values, axis=1) * (1 - dones)
 
@@ -136,7 +145,7 @@ if __name__ == '__main__':
     # state_size = BOARD_SHAPE
     # action_size = len(env.board[env.board==0])  # TODO: 반복문 안에 집어넣기
     
-    render = False
+    render = True
 
     agent_black = DQNAgent()
     agent_white = DQNAgent()
