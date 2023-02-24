@@ -7,7 +7,7 @@ import random
 
 from keras import Model
 from keras import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Conv2D
 from keras.layers import Flatten
 from keras.optimizers import Adam
 
@@ -32,20 +32,24 @@ class DQNAgent():
     def __init__(self):
         
         self.model = Sequential([
-            Flatten(input_shape=BOARD_SHAPE),
-            Dense(128, activation='relu'),
-            Dense(128, activation='relu'),
-            Dense(128, activation='relu'),
+            Conv2D(64, (3, 3), activation='relu', input_shape=(15, 15, 1), padding='same'),
+            Conv2D(128, (3, 3), activation='relu', padding='same'),
+            Conv2D(256, (3, 3), activation='relu', padding='same'),
+            Flatten(),
+            Dense(512, activation='tanh'),
+            Dense(256, activation='tanh'),
             Dense(225, activation='softmax')
         ])
         # 입력 (-1, 15, 15, 1)
         # 출력 (-1, 225)
 
         self.target_model = Sequential([
-            Flatten(input_shape=BOARD_SHAPE),
-            Dense(128, activation='relu'),
-            Dense(128, activation='relu'),
-            Dense(128, activation='relu'),
+            Conv2D(64, (3, 3), activation='relu', input_shape=(15, 15, 1), padding='same'),
+            Conv2D(128, (3, 3), activation='relu', padding='same'),
+            Conv2D(256, (3, 3), activation='relu', padding='same'),
+            Flatten(),
+            Dense(512, activation='tanh'),
+            Dense(256, activation='tanh'),
             Dense(225, activation='softmax')
         ])
         # 입력 (-1, 15, 15, 1)
@@ -56,19 +60,16 @@ class DQNAgent():
         self.num_action = BOARD_SHAPE[0]
         self.gamma = 0.99
         self.optimizer = Adam(lr=0.001)
-        self.epsilon_start = 1.0
-        self.epsilon_end = 0.01
-        self.epsilon_decay = 0.0001
+        self.epsilon = 0.7
         self.train_start = 1000
         self.step = 1
 
-        self.batch_size = 128
+        self.batch_size = 3
         self.memory = []
         self.lr = 0.001
 
 
     def select_action(self, state):
-        self.epsilon = self.epsilon_end + (self.epsilon_start - self.epsilon_end) * np.exp(-1. * self.step / self.epsilon_decay)
         self.step += 1
         if np.random.rand() < self.epsilon:
             # return np.random.randint(self.num_action), np.random.randint(self.num_action)
